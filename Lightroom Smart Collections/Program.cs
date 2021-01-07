@@ -14,10 +14,10 @@ namespace Lightroom_Smart_Collections
                 Directory.CreateDirectory(desktopPath);
             }
             var startDate = new DateTime(2018, 01, 01);
-            for (int weekNo = 1; weekNo < (52 * 2) + 2; weekNo++)
+            for (int weekNo = 1; weekNo < (52 * 3) + 2; weekNo++)
             {
                 var endDate = startDate.AddDays(6);
-                if (weekNo > 52)
+                if (weekNo > 52 * 2)
                 {
                     var output = @$"
 s = {{
