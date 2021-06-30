@@ -13,33 +13,57 @@ namespace Lightroom_Smart_Collections
             {
                 Directory.CreateDirectory(desktopPath);
             }
-            var startDate = new DateTime(2018, 01, 01);
-            for (int weekNo = 1; weekNo < (52 * 4) + 2; weekNo++)
+            var currentYear = 3;
+            await CreateSmartCollections(string.Empty);
+            await CreateSmartCollections("D_Book");
+            await CreateSmartCollections("R_Book");
+
+            async Task CreateSmartCollections(string keywordName)
             {
-                var endDate = startDate.AddDays(6);
-                if (weekNo > 52 * 3)
+                var startDate = new DateTime(2018, 01, 01);
+                for (int weekNo = 1; weekNo < (52 * (currentYear + 1)) + 1; weekNo++)
                 {
-                    var output = @$"
+                    var endDate = startDate.AddDays(6);
+                    if (weekNo > 52 * currentYear)
+                    {
+                        var collectionName = $"Week {weekNo}";
+                        if (!string.IsNullOrWhiteSpace(keywordName))
+                        {
+                            collectionName = $"{keywordName} - {collectionName}";
+                        }
+                        var output = @$"
 s = {{
-	internalName = ""Week {weekNo}"",
-    title = ""Week {weekNo}"",
+	internalName = ""{collectionName}"",
+    title = ""{collectionName}"",
 	type = ""LibrarySmartCollection"",
 	value = {{
-                    {{
-                        criteria = ""captureTime"",
+        {{
+            criteria = ""captureTime"",
 			operation = ""in"",
-			value = ""{startDate.ToString("yyyy-MM-dd")}"",
-			value2 = ""{endDate.ToString("yyyy-MM-dd")}"",
-		}},
+			value = ""{startDate:yyyy-MM-dd}"",
+			value2 = ""{endDate:yyyy-MM-dd}"",
+		}},";
+            if (!string.IsNullOrWhiteSpace(keywordName))
+            {
+                output += @$"
+	    {{
+            criteria = ""keywords"",
+            operation = ""any"",
+			value = ""{keywordName}"",
+			value2 = """",
+		}},";
+            }
+            output += @$"
 		combine = ""intersect"",
 	}},
 	version = 0,
-}}
-            ";
-                    using StreamWriter outputFile = new StreamWriter(Path.Combine(desktopPath, $"Week {weekNo}.lrsmcol"), false);
-                    await outputFile.WriteAsync(output);
+}}";
+                                                
+                        using StreamWriter outputFile = new StreamWriter(Path.Combine(desktopPath, $"{collectionName}.lrsmcol"), false);
+                        await outputFile.WriteAsync(output);
+                    }
+                    startDate = endDate.AddDays(1);
                 }
-                startDate = endDate.AddDays(1);
             }
         }
     }
