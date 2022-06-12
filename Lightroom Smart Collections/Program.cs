@@ -13,24 +13,18 @@ namespace Lightroom_Smart_Collections
             {
                 Directory.CreateDirectory(desktopPath);
             }
-            var currentYear = 3;
-            await CreateSmartCollections(string.Empty);
-            await CreateSmartCollections("D_Book");
-            await CreateSmartCollections("R_Book");
+            var currentYear = 0;
+            await CreateSmartCollections();
 
-            async Task CreateSmartCollections(string keywordName)
+            async Task CreateSmartCollections()
             {
-                var startDate = new DateTime(2018, 01, 01);
+                var startDate = new DateTime(1900, 01, 01);
                 for (int weekNo = 1; weekNo < (52 * (currentYear + 1)) + 1; weekNo++)
                 {
                     var endDate = startDate.AddDays(6);
                     if (weekNo > 52 * currentYear)
                     {
                         var collectionName = $"Week {weekNo}";
-                        if (!string.IsNullOrWhiteSpace(keywordName))
-                        {
-                            collectionName = $"{keywordName} - {collectionName}";
-                        }
                         var output = @$"
 s = {{
 	internalName = ""{collectionName}"",
@@ -43,22 +37,12 @@ s = {{
 			value = ""{startDate:yyyy-MM-dd}"",
 			value2 = ""{endDate:yyyy-MM-dd}"",
 		}},";
-            if (!string.IsNullOrWhiteSpace(keywordName))
-            {
-                output += @$"
-	    {{
-            criteria = ""keywords"",
-            operation = ""any"",
-			value = ""{keywordName}"",
-			value2 = """",
-		}},";
-            }
-            output += @$"
+                        output += @$"
 		combine = ""intersect"",
 	}},
 	version = 0,
 }}";
-                                                
+
                         using StreamWriter outputFile = new StreamWriter(Path.Combine(desktopPath, $"{collectionName}.lrsmcol"), false);
                         await outputFile.WriteAsync(output);
                     }
